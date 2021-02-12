@@ -26,48 +26,87 @@ import "./Board.css";
  *  This doesn't handle any clicks --- clicks are on individual cells
  *
  **/
+function randomSwitch() {
+	return Math.round(Math.random()) === 1;
+}
 
-function Board({ nrows, ncols, chanceLightStartsOn }) {
-  const [board, setBoard] = useState(createBoard());
+function Board({ nrows = 3, ncols = 3, chanceLightStartsOn }) {
+	const [board, setBoard] = useState(createBoard());
 
-  /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
-  function createBoard() {
-    let initialBoard = [];
-    // TODO: create array-of-arrays of true/false values
-    return initialBoard;
-  }
+	/** create a board nrows high/ncols wide, each cell randomly lit or unlit */
+	function createBoard() {
+		let initialBoard = [];
+		// TODO: create array-of-arrays of true/false values
+		for (let i = 0; i < nrows; i++) {
+			const row = [];
+			initialBoard.push(row);
+			for (let j = 0; j < ncols; j++) {
+				row.push(randomSwitch());
+			}
+		}
+		return initialBoard;
+	}
 
-  function hasWon() {
-    // TODO: check the board in state to determine whether the player has won.
-  }
+	function hasWon() {
+		// TODO: check the board in state to determine whether the player has won.
+		for (let i = 0; i < nrows; i++) {
+			for (let j = 0; j < ncols; j++) {
+				if (board[i][j]) return false;
+			}
+		}
+		return true;
+	}
 
-  function flipCellsAround(coord) {
-    setBoard(oldBoard => {
-      const [y, x] = coord.split("-").map(Number);
+	function flipCellsAround(coord) {
+		setBoard((oldBoard) => {
+			const [y, x] = coord.split("-").map(Number);
 
-      const flipCell = (y, x, boardCopy) => {
-        // if this coord is actually on board, flip it
+			const flipCell = (y, x, boardCopy) => {
+				// if this coord is actually on board, flip it
 
-        if (x >= 0 && x < ncols && y >= 0 && y < nrows) {
-          boardCopy[y][x] = !boardCopy[y][x];
-        }
-      };
+				if (x >= 0 && x < ncols && y >= 0 && y < nrows) {
+					console.log(`${y}-${x}`);
+					console.log(boardCopy);
+					boardCopy[y][x] = !boardCopy[y][x];
+					console.log(boardCopy);
+				}
+			};
 
-      // TODO: Make a (deep) copy of the oldBoard
-
-      // TODO: in the copy, flip this cell and the cells around it
-
-      // TODO: return the copy
-    });
-  }
-
-  // if the game is won, just show a winning msg & render nothing else
-
-  // TODO
-
-  // make table board
-
-  // TODO
+			// TODO: Make a (deep) copy of the oldBoard
+			const copyBoard = [...oldBoard];
+			// TODO: in the copy, flip this cell and the cells around it
+			flipCell(y, x, copyBoard);
+			flipCell(y - 1, x, copyBoard);
+			flipCell(y + 1, x, copyBoard);
+			flipCell(y, x + 1, copyBoard);
+			flipCell(y, x - 1, copyBoard);
+			// TODO: return the copy
+			return copyBoard;
+		});
+	}
+	return (
+		<div className="Board">
+			{/* if the game is won, just show a winning msg & render nothing else //
+			TODO */}
+			<h2>{hasWon() ? "You Won!!!" : ""}</h2>
+			{/* // make table board // TODO */}
+			<table>
+				<tbody>
+					{board.map((row, idx) => (
+						<tr key={idx}>
+							{row.map((col, idx1) => (
+								<Cell
+									key={`${idx1}-${idx}`}
+									flipCellsAroundMe={() => flipCellsAround(`${idx}-${idx1}`)}
+									isLit={board[idx][idx1]}
+								/>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
 }
 
 export default Board;
